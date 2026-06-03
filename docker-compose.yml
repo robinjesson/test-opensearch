@@ -1,41 +1,42 @@
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.16
-    container_name: elasticsearch
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: opensearch
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - plugins.security.disabled=true # Désactive la sécurité pour tes tests locaux
     ports:
       - "9200:9200"
-      - "9300:9300"
+      - "9600:9600"
     healthcheck:
       test: curl -s http://localhost:9200 >/dev/null || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - elasticsearch-network
+      - opensearch-network
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+      - opensearch_data:/usr/share/opensearch/data
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.16
-    container_name: kibana
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.0
+    container_name: opensearch-dashboards
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+      - OPENSEARCH_HOSTS=http://opensearch:9200
     ports:
-      - "5601:5601"
+      - "5601:5601" # Même port que Kibana !
     depends_on:
-      elasticsearch:
+      opensearch:
         condition: service_healthy
     networks:
-      - elasticsearch-network
+      - opensearch-network
 
 networks:
-  elasticsearch-network:
+  opensearch-network:
     driver: bridge
 
 volumes:
-  elasticsearch_data:
+  opensearch_data:
     driver: local
