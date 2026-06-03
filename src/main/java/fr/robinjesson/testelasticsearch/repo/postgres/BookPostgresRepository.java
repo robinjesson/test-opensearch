@@ -1,4 +1,4 @@
-package fr.robinjesson.testelasticsearch.repo;
+package fr.robinjesson.testelasticsearch.repo.postgres;
 
 import fr.robinjesson.testelasticsearch.model.postgres.BookEntity; // <-- On utilise l'Entity
 import org.springframework.data.jpa.repository.JpaRepository;

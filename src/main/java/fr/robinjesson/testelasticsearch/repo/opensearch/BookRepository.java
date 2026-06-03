@@ -1,4 +1,4 @@
-package fr.robinjesson.testelasticsearch.repo;
+package fr.robinjesson.testelasticsearch.repo.opensearch;
 
 import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import org.springframework.data.elasticsearch.annotations.Query;

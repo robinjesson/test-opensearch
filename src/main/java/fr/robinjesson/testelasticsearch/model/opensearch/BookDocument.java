@@ -8,6 +8,8 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Mapping;
 
+import java.util.List;
+
 @Document(indexName = "books")
 @Mapping(mappingPath = "/elasticsearch/mappings/books.json")
 @Getter
@@ -25,4 +27,7 @@ public class BookDocument {
 
     @Field(type = FieldType.Keyword)
     private String author;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private List<String> categories;
 }
