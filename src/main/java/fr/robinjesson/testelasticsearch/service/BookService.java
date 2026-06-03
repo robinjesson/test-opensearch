@@ -32,8 +32,15 @@ public class BookService {
         return savedEntity;
     }
     public List<BookDocument> searchBooks(String query) {
-        // La recherche interroge OpenSearch et retourne des Documents
-        return bookRepository.findByTitleContainingOrContentContaining(query, query);
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        // Si l'utilisateur tape "Hi Pot", on le transforme en "Hi* Pot*"
+        // Cela indique à OpenSearch de chercher les mots commençant par Hi OU commençant par Pot
+        String formattedQuery = query.trim().replaceAll("\\s+", "* ") + "*";
+
+        return bookRepository.findByTitleContainingOrContentContaining(formattedQuery, formattedQuery);
     }
 
     @Transactional

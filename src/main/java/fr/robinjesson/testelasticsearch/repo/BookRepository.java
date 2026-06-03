@@ -9,10 +9,11 @@ public interface BookRepository extends ElasticsearchRepository<BookDocument, Lo
 
     @Query("""
         {
-          "multi_match": {
+          "query_string": {
             "query": "?0",
             "fields": ["title", "content"],
-            "operator": "OR"
+            "default_operator": "OR",
+            "analyze_wildcard": true
           }
         }
         """)
