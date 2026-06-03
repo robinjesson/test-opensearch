@@ -3,6 +3,9 @@
     "id": { "type": "keyword" },
     "title": { "type": "text", "analyzer": "standard" },
     "content": { "type": "text", "analyzer": "standard" },
-    "author": { "type": "keyword" }
+    "author": { "type": "keyword" },
+    "categories": { "type": "keyword" },
+    "versionCount": { "type": "integer" },
+    "lastRevisionType": { "type": "keyword" }
   }
 }

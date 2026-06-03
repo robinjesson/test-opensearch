@@ -3,6 +3,7 @@ package fr.robinjesson.testelasticsearch.model.postgres;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 @Table(name = "books")
 @Getter
 @Setter
+@Audited
 public class BookEntity {
 
     @Id

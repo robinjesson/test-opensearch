@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "categories")
 @Getter
 @Setter
+@Audited
 public class CategoryEntity {
 
     @Id

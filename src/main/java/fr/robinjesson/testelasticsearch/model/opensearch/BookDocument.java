@@ -30,4 +30,10 @@ public class BookDocument {
 
     @Field(type = FieldType.Text, analyzer = "standard")
     private List<String> categories;
+
+    @Field(type = FieldType.Integer)
+    private Integer versionCount;
+
+    @Field(type = FieldType.Keyword)
+    private String lastRevisionType;
 }
