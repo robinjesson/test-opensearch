@@ -1,12 +1,12 @@
 package fr.robinjesson.testelasticsearch.repo;
 
-import fr.robinjesson.testelasticsearch.model.Book;
+import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;
 
-public interface BookRepository extends ElasticsearchRepository<Book, String> {
-    List<Book> findByTitleContainingOrContentContaining(String title, String content);
+public interface BookRepository extends ElasticsearchRepository<BookDocument, Long> {
+    List<BookDocument> findByTitleContainingOrContentContaining(String title, String content);
 
-    List<Book> findByAuthor(String author);
+    List<BookDocument> findByAuthor(String author);
 }

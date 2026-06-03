@@ -1,7 +1,10 @@
 package fr.robinjesson.testelasticsearch.service;
 
-import fr.robinjesson.testelasticsearch.model.Book;
+import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
+import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
+import fr.robinjesson.testelasticsearch.repo.BookPostgresRepository;
 import fr.robinjesson.testelasticsearch.repo.BookRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,17 +14,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookService {
 
-    private final BookRepository bookRepository;
+    private final BookPostgresRepository bookPostgresRepository; // SQL
+    private final BookRepository bookRepository; // OpenSearch
 
-    public Book saveBook(Book book) {
-        return bookRepository.save(book);
+    @Transactional
+    public BookEntity saveBook(BookEntity bookEntity) {
+        BookEntity savedEntity = bookPostgresRepository.save(bookEntity);
+
+        BookDocument document = new BookDocument();
+        document.setId(savedEntity.getId());
+        document.setTitle(savedEntity.getTitle());
+        document.setContent(savedEntity.getContent());
+        document.setAuthor(savedEntity.getAuthor());
+
+        bookRepository.save(document);
+
+        return savedEntity;
     }
-
-    public List<Book> searchBooks(String query) {
+    public List<BookDocument> searchBooks(String query) {
+        // La recherche interroge OpenSearch et retourne des Documents
         return bookRepository.findByTitleContainingOrContentContaining(query, query);
     }
 
-    public void deleteBook(String id) {
+    @Transactional
+    public void deleteBook(final Long id) {
+        bookPostgresRepository.deleteById(id);
         bookRepository.deleteById(id);
     }
 }

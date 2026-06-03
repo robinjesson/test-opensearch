@@ -1,4 +1,4 @@
-package fr.robinjesson.testelasticsearch.model;
+package fr.robinjesson.testelasticsearch.model.opensearch;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,10 +12,10 @@ import org.springframework.data.elasticsearch.annotations.Mapping;
 @Mapping(mappingPath = "/elasticsearch/mappings/books.json")
 @Getter
 @Setter
-public class Book {
+public class BookDocument {
 
     @Id
-    private String id;
+    private Long id;
 
     @Field(type = FieldType.Text, analyzer = "standard")
     private String title;

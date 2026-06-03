@@ -1,6 +1,7 @@
-package fr.robinjesson.testelasticsearch.api;
+package fr.robinjesson.testelasticsearch.controller;
 
-import fr.robinjesson.testelasticsearch.model.Book;
+import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
+import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
 import fr.robinjesson.testelasticsearch.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +16,17 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookService.saveBook(book);
+    public BookEntity createBook(@RequestBody BookEntity bookEntity) {
+        return bookService.saveBook(bookEntity);
     }
 
     @GetMapping("/search")
-    public List<Book> searchBooks(@RequestParam String query) {
+    public List<BookDocument> search(@RequestParam String query) {
         return bookService.searchBooks(query);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBooks(@PathVariable String id) {
+    public void delete(@PathVariable Long id) {
         bookService.deleteBook(id);
     }
 }
