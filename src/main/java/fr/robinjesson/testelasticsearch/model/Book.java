@@ -1,0 +1,28 @@
+package fr.robinjesson.testelasticsearch.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+
+@Document(indexName = "books")
+@Mapping(mappingPath = "/elasticsearch/mappings/books.json")
+@Getter
+@Setter
+public class Book {
+
+    @Id
+    private String id;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String title;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String content;
+
+    @Field(type = FieldType.Keyword)
+    private String author;
+}
