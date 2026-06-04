@@ -1,5 +1,6 @@
 package fr.robinjesson.testelasticsearch.service;
 
+import fr.robinjesson.testelasticsearch.event.BookEvent;
 import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
 import fr.robinjesson.testelasticsearch.model.postgres.CategoryEntity;
@@ -7,13 +8,13 @@ import fr.robinjesson.testelasticsearch.repo.opensearch.BookOpensearchRepository
 import fr.robinjesson.testelasticsearch.repo.postgres.BookPostgresRepository;
 import fr.robinjesson.testelasticsearch.repo.postgres.CategoryPostgresRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public class BookService {
     private final BookPostgresRepository bookPostgresRepository;
     private final CategoryPostgresRepository categoryPostgresRepository;
     private final BookOpensearchRepository bookOpensearchRepository; // Gardé pour la méthode searchBooks
-    private final BookIndexerService bookIndexerService; // <-- Injection du nouveau service
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public BookEntity saveBook(BookEntity bookEntity) {
@@ -38,7 +39,7 @@ public class BookService {
 
         BookEntity savedEntity = bookPostgresRepository.save(bookEntity);
 
-        bookIndexerService.indexBook(savedEntity);
+        eventPublisher.publishEvent(new BookEvent(savedEntity.getId(), BookEvent.ActionType.SAVE));
 
         return savedEntity;
     }
@@ -66,7 +67,7 @@ public class BookService {
     @Transactional
     public void deleteBook(final Long id) {
         bookPostgresRepository.deleteById(id);
-        bookOpensearchRepository.deleteById(id);
+        eventPublisher.publishEvent(new BookEvent(id, BookEvent.ActionType.DELETE));
     }
 
     @Transactional
@@ -91,21 +92,9 @@ public class BookService {
 
         BookEntity savedEntity = bookPostgresRepository.save(existingBook);
 
-        bookIndexerService.indexBook(savedEntity);
+        eventPublisher.publishEvent(new BookEvent(savedEntity.getId(), BookEvent.ActionType.UPDATE));
 
         return savedEntity;
-    }
-
-    @Transactional(readOnly = true)
-    public void reindexAllBooks() {
-        List<BookEntity> allBooks = bookPostgresRepository.findAll();
-
-        for (BookEntity book : allBooks) {
-            try {
-                bookIndexerService.indexBook(book);
-            } catch (Exception e) {
-            }
-        }
     }
 
 

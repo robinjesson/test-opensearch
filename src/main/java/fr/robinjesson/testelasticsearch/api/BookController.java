@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
@@ -45,11 +43,6 @@ public class BookController {
     @PutMapping("/{id}")
     public BookEntity updateBook(@PathVariable Long id, @RequestBody BookEntity bookEntity) {
         return bookService.updateBook(id, bookEntity);
-    }
-
-    @PostMapping("/opensearch/index")
-    public void updateBook() {
-        bookService.reindexAllBooks();
     }
 
 }
