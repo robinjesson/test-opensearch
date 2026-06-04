@@ -3,12 +3,12 @@ package fr.robinjesson.testelasticsearch.service;
 import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
 import fr.robinjesson.testelasticsearch.model.postgres.CategoryEntity;
+import fr.robinjesson.testelasticsearch.repo.opensearch.BookOpensearchRepository;
 import fr.robinjesson.testelasticsearch.repo.postgres.BookPostgresRepository;
 import fr.robinjesson.testelasticsearch.repo.postgres.CategoryPostgresRepository;
-import fr.robinjesson.testelasticsearch.repo.opensearch.BookRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ public class BookService {
 
     private final BookPostgresRepository bookPostgresRepository;
     private final CategoryPostgresRepository categoryPostgresRepository;
-    private final BookRepository bookRepository; // Gardé pour la méthode searchBooks
+    private final BookOpensearchRepository bookOpensearchRepository; // Gardé pour la méthode searchBooks
     private final BookIndexerService bookIndexerService; // <-- Injection du nouveau service
 
     @Transactional
@@ -40,18 +40,25 @@ public class BookService {
         return savedEntity;
     }
 
-    public List<BookDocument> searchBooks(String query) {
+    public List<BookDocument> searchBooksWithOpensearch(String query) {
         if (query == null || query.isBlank()) {
             return List.of();
         }
         String formattedQuery = query.trim().replaceAll("\\s+", "* ") + "*";
-        return bookRepository.findByTitleContainingOrContentContaining(formattedQuery, formattedQuery);
+        return bookOpensearchRepository.findByTitleContainingOrContentContaining(formattedQuery, formattedQuery);
+    }
+
+    public List<BookEntity> searchBooksWithHibernate(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        return bookPostgresRepository.findByTitleContainingOrContentContainingIgnoreCase(query, query);
     }
 
     @Transactional
     public void deleteBook(final Long id) {
         bookPostgresRepository.deleteById(id);
-        bookRepository.deleteById(id);
+        bookOpensearchRepository.deleteById(id);
     }
 
     @Transactional
@@ -80,4 +87,18 @@ public class BookService {
 
         return savedEntity;
     }
+
+    @Transactional(readOnly = true)
+    public void reindexAllBooks() {
+        List<BookEntity> allBooks = bookPostgresRepository.findAll();
+
+        for (BookEntity book : allBooks) {
+            try {
+                bookIndexerService.indexBook(book);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+
 }

@@ -3,7 +3,7 @@ package fr.robinjesson.testelasticsearch.service;
 import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
 import fr.robinjesson.testelasticsearch.model.postgres.CategoryEntity;
-import fr.robinjesson.testelasticsearch.repo.opensearch.BookRepository;
+import fr.robinjesson.testelasticsearch.repo.opensearch.BookOpensearchRepository;
 import fr.robinjesson.testelasticsearch.repo.postgres.BookPostgresRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.List;
 public class BookIndexerService {
 
     private final BookPostgresRepository bookPostgresRepository;
-    private final BookRepository bookRepository; // OpenSearch Repo
+    private final BookOpensearchRepository bookOpensearchRepository; // OpenSearch Repo
     private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
@@ -65,6 +65,6 @@ public class BookIndexerService {
             document.setLastRevisionType("ADD");
         }
 
-        bookRepository.save(document);
+        bookOpensearchRepository.save(document);
     }
 }

@@ -20,9 +20,14 @@ public class BookController {
         return bookService.saveBook(bookEntity);
     }
 
-    @GetMapping("/search")
-    public List<BookDocument> search(@RequestParam String query) {
-        return bookService.searchBooks(query);
+    @GetMapping("/opensearch/search")
+    public List<BookDocument> searchOpenSearch(@RequestParam String query) {
+        return bookService.searchBooksWithOpensearch(query);
+    }
+
+    @GetMapping("/hibernate/search")
+    public List<BookEntity> searchHibernate(@RequestParam String query) {
+        return bookService.searchBooksWithHibernate(query);
     }
 
     @DeleteMapping("/{id}")
@@ -34,4 +39,10 @@ public class BookController {
     public BookEntity updateBook(@PathVariable Long id, @RequestBody BookEntity bookEntity) {
         return bookService.updateBook(id, bookEntity);
     }
+
+    @PostMapping("/opensearch/index")
+    public void updateBook() {
+        bookService.reindexAllBooks();
+    }
+
 }
