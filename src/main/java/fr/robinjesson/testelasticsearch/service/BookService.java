@@ -7,6 +7,9 @@ import fr.robinjesson.testelasticsearch.repo.opensearch.BookOpensearchRepository
 import fr.robinjesson.testelasticsearch.repo.postgres.BookPostgresRepository;
 import fr.robinjesson.testelasticsearch.repo.postgres.CategoryPostgresRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,19 +43,24 @@ public class BookService {
         return savedEntity;
     }
 
-    public List<BookDocument> searchBooksWithOpensearch(String query) {
+    public Page<BookDocument> searchBooksWithOpensearch(String query, int page, int size) {
         if (query == null || query.isBlank()) {
-            return List.of();
+            return Page.empty();
         }
+
         String formattedQuery = query.trim().replaceAll("\\s+", "* ") + "*";
-        return bookOpensearchRepository.findByTitleContainingOrContentContaining(formattedQuery, formattedQuery);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return bookOpensearchRepository.findByTitleContainingOrCategoriesContaining(formattedQuery, pageable);
     }
 
-    public List<BookEntity> searchBooksWithHibernate(String query) {
+    public Page<BookEntity> searchBooksWithHibernate(String query, int page, int size) {
         if (query == null || query.isBlank()) {
-            return List.of();
+            return Page.empty();
         }
-        return bookPostgresRepository.findByTitleContainingOrContentContainingIgnoreCase(query, query);
+        Pageable pageable = PageRequest.of(page, size);
+        return bookPostgresRepository.findByTitleContainingOrContentContainingIgnoreCase(query, pageable);
     }
 
     @Transactional
