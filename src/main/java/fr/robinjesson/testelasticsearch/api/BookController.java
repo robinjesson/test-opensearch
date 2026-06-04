@@ -1,4 +1,4 @@
-package fr.robinjesson.testelasticsearch.controller;
+package fr.robinjesson.testelasticsearch.api;
 
 import fr.robinjesson.testelasticsearch.model.opensearch.BookDocument;
 import fr.robinjesson.testelasticsearch.model.postgres.BookEntity;
