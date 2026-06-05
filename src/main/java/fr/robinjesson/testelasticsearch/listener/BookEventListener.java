@@ -29,13 +29,14 @@ public class BookEventListener {
         try {
             switch (event.action()) {
                 case SAVE, UPDATE -> {
-                    BookEntity book = bookPostgresRepository.findById(event.bookId()).orElse(null);
-                    if (book != null) {
-                        bookIndexerService.indexBook(book);
-                        log.info("Livre ID {} synchronisé avec succès dans OpenSearch.", event.bookId());
-                    } else {
-                        log.warn("Livre ID {} introuvable en BDD lors de l'indexation.", event.bookId());
-                    }
+                    bookPostgresRepository.findByIdWithCategories(event.bookId())
+                            .ifPresentOrElse(
+                                    (book) -> {
+                                        bookIndexerService.indexBook(book);
+                                        log.info("Livre ID {} synchronisé avec succès dans OpenSearch.", event.bookId());
+                                    },
+                                    () -> log.warn("Livre ID {} introuvable en BDD lors de l'indexation.", event.bookId())
+                            );
                 }
                 case DELETE -> {
                     bookOpensearchRepository.deleteById(event.bookId());
