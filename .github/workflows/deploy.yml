@@ -1,46 +1,60 @@
-name: Build and Push to GHCR
-
+name: SonarQube
 on:
   push:
-    branches: [ "main" ]
-
-env:
-  REGISTRY: ghcr.io
-  # Remplace manuellement par ton pseudo github/nom-de-repo si besoin
-  # ou laisse comme ça, GitHub va le deviner tout seul (ex: ghcr.io/robinjesson/testelasticsearch:latest)
-  IMAGE_TAG: ghcr.io/${{ github.repository }}:latest
-
+    branches:
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
-  build-and-push:
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # Obligatoire pour pousser sur GHCR
-
+      packages: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Émulateur pour compiler en ARM64 (Raspberry Pi) sur des serveurs AMD64
-      - name: Set up QEMU
-        uses: actions/automattic/action-sinon-qemu@v1
+      - uses: actions/checkout@v6
         with:
-          platforms: linux/arm64
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up Docker Buildx
-        uses: actions/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
-          registry: ${{ env.REGISTRY }}
+          java-version: 25
+          distribution: 'zulu' # Alternative distribution options are available.
+
+      - name: Cache Maven packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Image
-        uses: docker/build-push-action@v5
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Get project version
+        run: echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        if: github.event_name == 'push' # Only push on push events, not pull requests
+        uses: docker/build-push-action@v7
         with:
           context: .
+          file: ./Dockerfile
           push: true
-          platforms: linux/amd64,linux/arm64 # Crée une image compatible Mac/PC ET Raspberry Pi 4
-          tags: ${{ env.IMAGE_TAG }}
+          tags: |
+            ghcr.io/robinjesson/my-budget-api:${{ env.PROJECT_VERSION }}
+            ghcr.io/robinjesson/my-budget-api:${{ github.run_number }}
+            ${{ github.ref == 'refs/heads/develop' && 'ghcr.io/robinjesson/my-budget-api:latest' || '' }}
+          platforms: linux/amd64,linux/arm64
