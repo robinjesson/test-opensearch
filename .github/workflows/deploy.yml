@@ -55,5 +55,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/robinjesson/testelasticsearch:${{ github.run_number }}
-            ${{ github.ref == 'refs/heads/develop' && 'ghcr.io/robinjesson/testelasticsearch:latest' || '' }}
+            ${{ github.ref == 'refs/heads/main' && 'ghcr.io/robinjesson/testelasticsearch:latest' || '' }}
           platforms: linux/amd64,linux/arm64
