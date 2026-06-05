@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api/books/hibernate")
 @RequiredArgsConstructor
-public class BookController {
+public class BookHibernateController {
 
     private final BookService bookService;
 
@@ -19,16 +19,7 @@ public class BookController {
         return bookService.saveBook(bookEntity);
     }
 
-    @GetMapping("/opensearch/search")
-    public Page<BookDocument> searchOpenSearch(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        return bookService.searchBooksWithOpensearch(query, page, size);
-    }
-
-    @GetMapping("/hibernate/search")
+    @GetMapping
     public Page<BookEntity> searchHibernate(@RequestParam String query,
                                             @RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "20") int size) {
@@ -44,5 +35,11 @@ public class BookController {
     public BookEntity updateBook(@PathVariable Long id, @RequestBody BookEntity bookEntity) {
         return bookService.updateBook(id, bookEntity);
     }
+
+    @GetMapping("/{id}")
+    public BookEntity getBookById(@PathVariable Long id) {
+        return bookService.getBookByIdWithHibernate(id);
+    }
+
 
 }

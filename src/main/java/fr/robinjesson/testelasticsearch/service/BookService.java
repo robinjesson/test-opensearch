@@ -12,8 +12,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -95,6 +97,22 @@ public class BookService {
         eventPublisher.publishEvent(new BookEvent(savedEntity.getId(), BookEvent.ActionType.UPDATE));
 
         return savedEntity;
+    }
+
+    public BookDocument getBookByIdWithOpensearch(Long id) {
+        return bookOpensearchRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Le livre avec l'ID " + id + " n'existe pas."
+                ));
+    }
+
+    public BookEntity getBookByIdWithHibernate(Long id) {
+        return bookPostgresRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Le livre avec l'ID " + id + " n'existe pas."
+                ));
     }
 
 
