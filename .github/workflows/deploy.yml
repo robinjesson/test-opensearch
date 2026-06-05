@@ -46,9 +46,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Get project version
-        run: echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-
       - name: Build and push Docker image
         if: github.event_name == 'push' # Only push on push events, not pull requests
         uses: docker/build-push-action@v7
@@ -57,7 +54,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/robinjesson/my-budget-api:${{ env.PROJECT_VERSION }}
-            ghcr.io/robinjesson/my-budget-api:${{ github.run_number }}
-            ${{ github.ref == 'refs/heads/develop' && 'ghcr.io/robinjesson/my-budget-api:latest' || '' }}
+            ghcr.io/robinjesson/testelasticsearch:${{ github.run_number }}
+            ${{ github.ref == 'refs/heads/develop' && 'ghcr.io/robinjesson/testelasticsearch:latest' || '' }}
           platforms: linux/amd64,linux/arm64
