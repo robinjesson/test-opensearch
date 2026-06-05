@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: testelasticsearch
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+opensearch:
+  uris: ${OPENSEARCH_URL}
+  username: ${OPENSEARCH_USERNAME}
+  password: ${OPENSEARCH_PASSWORD}
+  ssl:
+    verification-mode: none
