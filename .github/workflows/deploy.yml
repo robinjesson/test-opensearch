@@ -1,0 +1,46 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  # Remplace manuellement par ton pseudo github/nom-de-repo si besoin
+  # ou laisse comme ça, GitHub va le deviner tout seul (ex: ghcr.io/robinjesson/testelasticsearch:latest)
+  IMAGE_TAG: ghcr.io/${{ github.repository }}:latest
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Obligatoire pour pousser sur GHCR
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Émulateur pour compiler en ARM64 (Raspberry Pi) sur des serveurs AMD64
+      - name: Set up QEMU
+        uses: actions/automattic/action-sinon-qemu@v1
+        with:
+          platforms: linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64 # Crée une image compatible Mac/PC ET Raspberry Pi 4
+          tags: ${{ env.IMAGE_TAG }}
